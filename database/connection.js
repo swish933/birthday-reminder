@@ -4,10 +4,10 @@ import mongoose from "mongoose";
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || "";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // connect to mongodb
-function connectToMongoDB() {
+async function connectToMongoDB() {
 	moogoose.connect(MONGODB_URI);
 
 	moogoose.connection.on("connected", () => {
