@@ -1,11 +1,11 @@
 import UserModel from "../database/users.schema.js";
 
 export const addCustomer = async (dto) => {
-	const data = await UserModel.create(dto);
-	if (data) {
+	try {
+		const data = await UserModel.create(dto);
 		return data;
-	} else {
-		throw new Error("Server Error");
+	} catch (error) {
+		throw new Error(error.message);
 	}
 };
 
