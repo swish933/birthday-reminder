@@ -2,12 +2,14 @@ import express from "express";
 import dotenv from "dotenv";
 import flash from "connect-flash";
 import session from "express-session";
-import cookieParser from "cookie-parser";
+// import cookieParser from "cookie-parser";
 import viewRouter from "./views/views.router.js";
 import errorHandler from "./middleware/error.middleware.js";
 import { connectToMongoDB } from "./database/connection.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import RedisStore from "connect-redis";
+import redisClient from "./integrations/redis.js";
 
 dotenv.config();
 
@@ -18,6 +20,13 @@ const __filename = fileURLToPath(import.meta.url); // get the resolved path to t
 const __dirname = path.dirname(__filename); // get the name of the directory
 
 connectToMongoDB();
+redisClient.connect();
+
+// Initialize store.
+let redisStore = new RedisStore({
+	client: redisClient,
+	prefix: "myapp:",
+});
 
 app.set("view engine", "ejs");
 
@@ -26,13 +35,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(
 	session({
-		secret: "keyboard cat",
+		store: redisStore,
 		resave: false,
-		saveUninitialized: true,
-		cookie: { secure: false },
+		saveUninitialized: false,
+		secret: "keyboard cat",
 	})
 );
-app.use(cookieParser("secret"));
+
 app.use(flash());
 
 app.use("/views", viewRouter);
